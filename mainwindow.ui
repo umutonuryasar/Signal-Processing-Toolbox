@@ -26,12 +26,12 @@
     <property name="title">
      <string>Generator Settings</string>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>220</y>
-       <width>258</width>
+       <width>231</width>
        <height>22</height>
       </rect>
      </property>
@@ -85,7 +85,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -178,7 +178,7 @@
       <x>20</x>
       <y>299</y>
       <width>250</width>
-      <height>261</height>
+      <height>271</height>
      </rect>
     </property>
     <property name="title">
@@ -209,7 +209,7 @@
       <x>300</x>
       <y>300</y>
       <width>481</width>
-      <height>251</height>
+      <height>271</height>
      </rect>
     </property>
     <property name="title">

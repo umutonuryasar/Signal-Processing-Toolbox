@@ -30,7 +30,7 @@ void FFT::compute(const QVector<double> &inputData)
 
     for(int i = 0; i < size / 2; i++)
     {
-        double magnitude = sqrt(fftOutput[i][0] * fftOutput[i][0] + fftOutput[i][1] * fftOutput[i][1]);
+        double magnitude = sqrt(fftOutput[i][0] * fftOutput[i][0] + fftOutput[i][1] * fftOutput[i][1]) / size;
 
         /*
         // Handle near-zero magnitude values (avoid log(0))

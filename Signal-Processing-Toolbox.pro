@@ -9,14 +9,20 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    fft.cpp \
+    freqdomainplot.cpp \
     main.cpp \
     mainwindow.cpp \
     qcustomplot.cpp \
+    timedomainplot.cpp \
     wavegenerator.cpp
 
 HEADERS += \
+    fft.h \
+    freqdomainplot.h \
     mainwindow.h \
     qcustomplot.h \
+    timedomainplot.h \
     wavegenerator.h
 
 FORMS += \

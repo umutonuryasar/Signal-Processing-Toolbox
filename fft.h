@@ -15,6 +15,9 @@ public:
     const QVector<double> &getFFTOutput() const;
     const QVector<double> &getFreqSamples() const;
 
+private slots:
+    void on_generatorButton_start_clicked();
+
 private:
     int size;
 
