@@ -59,10 +59,9 @@ void FFT::compute(const QVector<double> &inputData)
 
     fftw_execute(plan);
 
-    outputData.clear();
-    freqSamples.clear();
-    outputData.reserve(size / 2);
-    freqSamples.reserve(size / 2);
+    // Resize vectors instead of clearing and recreating
+    outputData.resize(size / 2);
+    freqSamples.resize(size / 2);
 
     for(int i = 0; i < size / 2; i++)
     {
@@ -72,11 +71,8 @@ void FFT::compute(const QVector<double> &inputData)
         if (magnitude < 1e-10)
             magnitude = 1e-10; // Set a small non-zero value
 
-        double magdB = 20 * std::log10(magnitude);
-        double value = (i * samplingFrequency / size);
-
-        freqSamples.append(value);
-        outputData.append(magdB);
+        outputData[i] = 20 * std::log10(magnitude);
+        freqSamples[i] = (i * samplingFrequency / size);
     }
 }
 

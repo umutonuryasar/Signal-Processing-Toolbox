@@ -4,23 +4,31 @@
 #include "timedomainplot.h"
 #include "freqdomainplot.h"
 #include "fft.h"
+#include <QMessageBox>
 
-const int timeInterval = 1000;
+const int updateInterval = 100;
+const int displayDuration = 5;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , timer(new QTimer(this))
+    , fft(new FFT(ui))
+    , waveGenerator(nullptr)
+    , isRunning(false)
+    , currentTime(0.0)
 {
     ui->setupUi(this);
     this->setWindowTitle("Signal Processing Toolbox");
 
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(updater()));
+    connect(timer, &QTimer::timeout, this, &MainWindow::updater);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete fft;
+    delete waveGenerator;
 }
 
 bool MainWindow::validateInputs()
@@ -47,48 +55,77 @@ bool MainWindow::validateInputs()
     return true;
 }
 
-void MainWindow::generateWave(QVector<double> &wave)
+void MainWindow::generateWave()
 {
+    if (!validateInputs()) {
+        return;
+    }
+
     double amplitude = ui->lineEdit_amplitude->text().toDouble();
     double frequency = ui->lineEdit_frequency->text().toDouble();
     double samplingFrequency = ui->lineEdit_samplingFrequency->text().toDouble();
-    double duration = 1.0;
 
-    WaveGenerator waveformGenerator(amplitude, frequency, samplingFrequency);
-    WaveGenerator::WaveType waveType = static_cast<WaveGenerator::WaveType>(ui->comboBox_waveType->currentIndex());
-    QVector<double> waveInput = waveformGenerator.generateWave(waveType, duration);
-    wave.append(waveInput);
+    delete waveGenerator;
+    waveGenerator = new WaveGenerator(amplitude, frequency, samplingFrequency);
 }
 
-void MainWindow::plotWave(QVector<double> &wave)
+void MainWindow::updateSignal()
 {
+    if (!waveGenerator) return;
+
     double samplingFrequency = ui->lineEdit_samplingFrequency->text().toDouble();
-    double duration = 1.0;
+    double duration = static_cast<double>(updateInterval) / 1000.0; // updateInterval ms'yi saniyeye çevir
+
+    WaveGenerator::WaveType waveType = static_cast<WaveGenerator::WaveType>(ui->comboBox_waveType->currentIndex());
+    QVector<double> newSamples = waveGenerator->generateWave(waveType, duration, currentTime);
+
+    signal.append(newSamples);
+
+    int maxSamples = static_cast<int>(displayDuration * samplingFrequency);
+    if (signal.size() > maxSamples) {
+        signal = signal.mid(signal.size() - maxSamples);
+    }
+
+    currentTime += duration;
+}
+
+void MainWindow::plotWave()
+{
+    if (signal.isEmpty()) {
+        return;
+    }
+
+    double samplingFrequency = ui->lineEdit_samplingFrequency->text().toDouble();
 
     double dt = 1.0 / samplingFrequency;
-    int numSamples = static_cast<int>(duration * samplingFrequency);
-
-    for (int i=0; i<numSamples; i++)
+    time.resize(signal.size());
+    for (int i = 0; i < signal.size(); i++)
     {
-        time.append(t);
-        t += dt;
+        time[i] = currentTime - (signal.size() - i) * dt;
     }
 
     TimeDomainPlot timeplot(ui->timePlot);
     timeplot.setupPlot();
-    timeplot.updatePlot(time, wave);
+    timeplot.updatePlot(time, signal);
 }
 
-void MainWindow::computeFFT(const QVector<double> &inputData)
+void MainWindow::computeFFT()
 {
-    FFT fft(ui);
-    fft.compute(inputData);
-    fftOutput = fft.getFFTOutput();
-    fftFreqSamp = fft.getFreqSamples();
+    if (signal.isEmpty()) {
+        return;
+    }
+
+    fft->compute(signal);
+    fftOutput = fft->getFFTOutput();
+    fftFreqSamp = fft->getFreqSamples();
 }
 
-void MainWindow::plotFFT(QVector<double> &fftFreqSamp, QVector<double> &fftOutput)
+void MainWindow::plotFFT()
 {
+    if (fftOutput.isEmpty() || fftFreqSamp.isEmpty()) {
+        return;
+    }
+
     FreqDomainPlot fftPlot(ui->fftPlot);
     fftPlot.setupPlot();
     fftPlot.updatePlot(fftFreqSamp, fftOutput);
@@ -96,28 +133,41 @@ void MainWindow::plotFFT(QVector<double> &fftFreqSamp, QVector<double> &fftOutpu
 
 void MainWindow::updater()
 {
-    generateWave(signal);
-    computeFFT(signal);
-    plotWave(signal);
-    plotFFT(fftFreqSamp, fftOutput);
+    updateSignal();
+    plotWave();
+    computeFFT();
+    plotFFT();
 }
 
 void MainWindow::on_generatorButton_start_clicked()
 {
-    if (validateInputs()) {
-        timer->start(timeInterval);
+    if (!isRunning && validateInputs()) {
+        generateWave();
+        timer->start(updateInterval);
+        isRunning = true;
+        ui->generatorButton_start->setEnabled(false);
+        ui->generatorButton_stop->setEnabled(true);
     }
-}
-
-void MainWindow::on_generatorButton_pause_clicked()
-{
-    timer->stop();
 }
 
 void MainWindow::on_generatorButton_stop_clicked()
 {
-    timer->stop();
-    time.clear();
-    signal.clear();
-    t=0;
+    if (isRunning) {
+        timer->stop();
+        isRunning = false;
+        ui->generatorButton_start->setEnabled(true);
+        ui->generatorButton_stop->setEnabled(false);
+
+        // Grafikleri temizle
+        signal.clear();
+        time.clear();
+        fftOutput.clear();
+        fftFreqSamp.clear();
+        currentTime = 0.0;
+
+        ui->timePlot->graph(0)->data()->clear();
+        ui->fftPlot->graph(0)->data()->clear();
+        ui->timePlot->replot();
+        ui->fftPlot->replot();
+    }
 }

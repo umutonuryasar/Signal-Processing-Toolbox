@@ -36,6 +36,13 @@
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="3">
+       <widget class="QPushButton" name="generatorButton_stop">
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
        <spacer name="horizontalSpacer">
         <property name="orientation">
@@ -56,21 +63,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
-       <widget class="QPushButton" name="generatorButton_stop">
-        <property name="text">
-         <string>Stop</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="2">
-       <widget class="QPushButton" name="generatorButton_pause">
-        <property name="text">
-         <string>Pause</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -102,6 +95,23 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="lineEdit_samplingFrequency"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_samplingFrequency">
+        <property name="text">
+         <string>Sampling Frequency</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_amplitude">
+        <property name="text">
+         <string>Amplitude (V)</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_waveType">
         <property name="text">
@@ -109,8 +119,8 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QLineEdit" name="lineEdit_amplitude"/>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="lineEdit_frequency"/>
       </item>
       <item row="0" column="2">
        <widget class="QComboBox" name="comboBox_waveType">
@@ -136,19 +146,8 @@
         </item>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_amplitude">
-        <property name="text">
-         <string>Amplitude (V)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_samplingFrequency">
-        <property name="text">
-         <string>Sampling Frequency</string>
-        </property>
-       </widget>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="lineEdit_amplitude"/>
       </item>
       <item row="2" column="1">
        <spacer name="horizontalSpacer_3">
@@ -163,27 +162,8 @@
         </property>
        </spacer>
       </item>
-      <item row="2" column="2">
-       <widget class="QLineEdit" name="lineEdit_frequency"/>
-      </item>
-      <item row="3" column="2">
-       <widget class="QLineEdit" name="lineEdit_samplingFrequency"/>
-      </item>
      </layout>
     </widget>
-   </widget>
-   <widget class="QGroupBox" name="groupBox_audioSettings">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>299</y>
-      <width>250</width>
-      <height>271</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Audio Settings</string>
-    </property>
    </widget>
    <widget class="QGroupBox" name="groupBox_timeDomainGraph">
     <property name="geometry">
@@ -237,7 +217,6 @@
   <tabstop>lineEdit_frequency</tabstop>
   <tabstop>lineEdit_samplingFrequency</tabstop>
   <tabstop>generatorButton_start</tabstop>
-  <tabstop>generatorButton_pause</tabstop>
   <tabstop>generatorButton_stop</tabstop>
  </tabstops>
  <resources/>

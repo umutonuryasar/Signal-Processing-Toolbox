@@ -2,13 +2,11 @@
 #define WAVEGENERATOR_H
 
 #include <QVector>
-#include <qmath.h>
 
 class WaveGenerator
 {
 public:
-    enum class WaveType
-    {
+    enum class WaveType {
         Sine,
         Square,
         Triangle,
@@ -16,7 +14,7 @@ public:
     };
 
     WaveGenerator(double amplitude, double frequency, double samplingFrequency);
-    QVector<double> generateWave(WaveType type, double duration);
+    QVector<double> generateWave(WaveType type, double duration, double startTime);
 
 private:
     double amplitude;
