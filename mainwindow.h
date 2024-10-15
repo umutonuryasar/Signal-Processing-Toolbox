@@ -31,6 +31,8 @@ private:
     void computeFFT(const QVector<double> &inputData);
     void plotFFT(QVector<double> &fftFreqSamp, QVector<double> &fftOutput);
 
+    bool validateInputs();
+
 private slots:
     void on_generatorButton_start_clicked();
     void on_generatorButton_pause_clicked();

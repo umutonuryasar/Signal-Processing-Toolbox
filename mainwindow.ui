@@ -32,7 +32,7 @@
        <x>10</x>
        <y>220</y>
        <width>231</width>
-       <height>22</height>
+       <height>26</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout">
@@ -231,6 +231,15 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>comboBox_waveType</tabstop>
+  <tabstop>lineEdit_amplitude</tabstop>
+  <tabstop>lineEdit_frequency</tabstop>
+  <tabstop>lineEdit_samplingFrequency</tabstop>
+  <tabstop>generatorButton_start</tabstop>
+  <tabstop>generatorButton_pause</tabstop>
+  <tabstop>generatorButton_stop</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

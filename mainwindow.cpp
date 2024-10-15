@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setWindowTitle("Signal Processing Toolbox");
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updater()));
@@ -20,6 +21,30 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+bool MainWindow::validateInputs()
+{
+    bool ok;
+    double amplitude = ui->lineEdit_amplitude->text().toDouble(&ok);
+    if (!ok || amplitude <= 0) {
+        QMessageBox::warning(this, "Invalid Input", "Please enter a valid positive number for amplitude.");
+        return false;
+    }
+
+    double frequency = ui->lineEdit_frequency->text().toDouble(&ok);
+    if (!ok || frequency <= 0) {
+        QMessageBox::warning(this, "Invalid Input", "Please enter a valid positive number for frequency.");
+        return false;
+    }
+
+    double samplingFrequency = ui->lineEdit_samplingFrequency->text().toDouble(&ok);
+    if (!ok || samplingFrequency <= 0 || samplingFrequency <= 2*frequency) {
+        QMessageBox::warning(this, "Invalid Input", "Please enter a valid sampling frequency (must be > 2 * signal frequency).");
+        return false;
+    }
+
+    return true;
 }
 
 void MainWindow::generateWave(QVector<double> &wave)
@@ -79,7 +104,9 @@ void MainWindow::updater()
 
 void MainWindow::on_generatorButton_start_clicked()
 {
-    timer->start(timeInterval);
+    if (validateInputs()) {
+        timer->start(timeInterval);
+    }
 }
 
 void MainWindow::on_generatorButton_pause_clicked()
