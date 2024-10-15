@@ -81,7 +81,7 @@ void MainWindow::plotWave(QVector<double> &wave)
 
 void MainWindow::computeFFT(const QVector<double> &inputData)
 {
-    FFT fft(inputData.size(), ui);
+    FFT fft(ui);
     fft.compute(inputData);
     fftOutput = fft.getFFTOutput();
     fftFreqSamp = fft.getFreqSamples();
