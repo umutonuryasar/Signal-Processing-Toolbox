@@ -2,6 +2,7 @@
 #define WAVEGENERATOR_H
 
 #include <QVector>
+#include <random>
 
 class WaveGenerator
 {
@@ -10,7 +11,8 @@ public:
         Sine,
         Square,
         Triangle,
-        Sawtooth
+        Sawtooth,
+        WhiteNoise
     };
 
     WaveGenerator(double amplitude, double frequency, double samplingFrequency);
@@ -20,6 +22,8 @@ private:
     double amplitude;
     double frequency;
     double samplingFrequency;
+    std::default_random_engine generator;
+    std::normal_distribution<double> distribution;
 };
 
 #endif // WAVEGENERATOR_H

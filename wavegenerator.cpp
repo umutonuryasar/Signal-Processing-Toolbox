@@ -6,7 +6,10 @@
 #endif
 
 WaveGenerator::WaveGenerator(double amplitude, double frequency, double samplingFrequency)
-    : amplitude(amplitude), frequency(frequency), samplingFrequency(samplingFrequency) {}
+    : amplitude(amplitude), frequency(frequency), samplingFrequency(samplingFrequency),
+    distribution(0.0, 1.0)  // Ortalama 0, standart sapma 1 olan normal dağılım
+{
+}
 
 QVector<double> WaveGenerator::generateWave(WaveType type, double duration, double startTime)
 {
@@ -35,6 +38,9 @@ QVector<double> WaveGenerator::generateWave(WaveType type, double duration, doub
             break;
         case WaveType::Sawtooth:
             value = (2 * amplitude / M_PI) * std::atan(std::tan(M_PI * frequency * t));
+            break;
+        case WaveType::WhiteNoise:
+            value = amplitude * distribution(generator);
             break;
         }
 
