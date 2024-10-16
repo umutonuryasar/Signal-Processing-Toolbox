@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1065</width>
+    <height>659</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>20</x>
       <y>20</y>
       <width>250</width>
-      <height>261</height>
+      <height>311</height>
      </rect>
     </property>
     <property name="title">
@@ -30,40 +30,13 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>220</y>
+       <y>270</y>
        <width>231</width>
        <height>26</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="3">
-       <widget class="QPushButton" name="generatorButton_stop">
-        <property name="text">
-         <string>Stop</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="0">
-       <widget class="QPushButton" name="generatorButton_start">
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -76,6 +49,20 @@
         </property>
        </spacer>
       </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="generatorButton_stop">
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QPushButton" name="generatorButton_start">
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
     <widget class="QWidget" name="layoutWidget">
@@ -84,19 +71,16 @@
        <x>10</x>
        <y>40</y>
        <width>231</width>
-       <height>151</height>
+       <height>221</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_frequency">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_waveType">
         <property name="text">
-         <string>Frequency (Hz)</string>
+         <string>Wave Type</string>
         </property>
        </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QLineEdit" name="lineEdit_samplingFrequency"/>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="label_samplingFrequency">
@@ -105,22 +89,31 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_amplitude">
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_filterType">
         <property name="text">
-         <string>Amplitude (V)</string>
+         <string>Filter Type</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_waveType">
-        <property name="text">
-         <string>Wave Type</string>
-        </property>
+      <item row="4" column="2">
+       <widget class="QComboBox" name="comboBox_filterType">
+        <item>
+         <property name="text">
+          <string>No Filter</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Low Pass Filter</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>High Pass Filter</string>
+         </property>
+        </item>
        </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLineEdit" name="lineEdit_frequency"/>
       </item>
       <item row="0" column="2">
        <widget class="QComboBox" name="comboBox_waveType">
@@ -151,8 +144,12 @@
         </item>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QLineEdit" name="lineEdit_amplitude"/>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_frequency">
+        <property name="text">
+         <string>Frequency (Hz)</string>
+        </property>
+       </widget>
       </item>
       <item row="2" column="1">
        <spacer name="horizontalSpacer_3">
@@ -167,6 +164,32 @@
         </property>
        </spacer>
       </item>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="lineEdit_amplitude"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_amplitude">
+        <property name="text">
+         <string>Amplitude (V)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="lineEdit_frequency"/>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="lineEdit_samplingFrequency"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_cutoffFrequency">
+        <property name="text">
+         <string>Cutoff Frequency</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLineEdit" name="lineEdit_cutoffFrequency"/>
+      </item>
      </layout>
     </widget>
    </widget>
@@ -175,8 +198,8 @@
      <rect>
       <x>300</x>
       <y>20</y>
-      <width>481</width>
-      <height>261</height>
+      <width>741</width>
+      <height>311</height>
      </rect>
     </property>
     <property name="title">
@@ -192,9 +215,9 @@
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>300</y>
-      <width>481</width>
-      <height>271</height>
+      <y>340</y>
+      <width>741</width>
+      <height>311</height>
      </rect>
     </property>
     <property name="title">

@@ -4,6 +4,7 @@
 #include "timedomainplot.h"
 #include "freqdomainplot.h"
 #include "fft.h"
+#include "filter.h"
 #include <QMessageBox>
 
 const int updateInterval = 100;
@@ -74,10 +75,26 @@ void MainWindow::updateSignal()
     if (!waveGenerator) return;
 
     double samplingFrequency = ui->lineEdit_samplingFrequency->text().toDouble();
-    double duration = static_cast<double>(updateInterval) / 1000.0; // updateInterval ms'yi saniyeye çevir
+    double duration = static_cast<double>(updateInterval) / 1000.0; // updateInterval milisecond to second
 
     WaveGenerator::WaveType waveType = static_cast<WaveGenerator::WaveType>(ui->comboBox_waveType->currentIndex());
     QVector<double> newSamples = waveGenerator->generateWave(waveType, duration, currentTime);
+
+    // Filter
+    int filterType = ui->comboBox_filterType->currentIndex();
+    if (filterType > 0) // 0 = No Filter
+    {
+        double cutoffFrequency = ui->lineEdit_cutoffFrequency->text().toDouble();
+        switch(filterType)
+        {
+        case 1: // Low Pass Filter
+            newSamples = Filter::lowPassFilter(newSamples, cutoffFrequency, samplingFrequency);
+            break;
+        case 2: // High Pass Filter
+            newSamples = Filter::highPassFilter(newSamples, cutoffFrequency, samplingFrequency);
+            break;
+        }
+    }
 
     signal.append(newSamples);
 

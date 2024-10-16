@@ -7,7 +7,7 @@
 
 WaveGenerator::WaveGenerator(double amplitude, double frequency, double samplingFrequency)
     : amplitude(amplitude), frequency(frequency), samplingFrequency(samplingFrequency),
-    distribution(0.0, 1.0)  // Ortalama 0, standart sapma 1 olan normal dağılım
+    distribution(0.0, 1.0)
 {
 }
 

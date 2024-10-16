@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     fft.cpp \
+    filter.cpp \
     freqdomainplot.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
 
 HEADERS += \
     fft.h \
+    filter.h \
     freqdomainplot.h \
     mainwindow.h \
     qcustomplot.h \
