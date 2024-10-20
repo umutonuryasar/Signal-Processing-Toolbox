@@ -8,7 +8,7 @@
 #include <QMessageBox>
 
 const int updateInterval = 100;
-const int displayDuration = 3;
+const int displayDuration = 1;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
