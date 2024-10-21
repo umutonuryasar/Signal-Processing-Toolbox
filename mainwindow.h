@@ -4,6 +4,12 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QVector>
+#include <QMediaPlayer>
+#include <QAudioOutput>
+#include <QFile>
+#include <QtMultimedia>
+#include <QAudioFormat>
+#include <QMediaDevices>
 
 class FFT;
 class WaveGenerator;
@@ -24,6 +30,13 @@ private slots:
     void on_generatorButton_start_clicked();
     void on_generatorButton_stop_clicked();
     void updater();
+    void on_loadWavButton_clicked();
+    void on_playButton_clicked();
+    void on_stopButton_clicked();
+    void on_progressSlider_valueChanged(int value);
+    void updatePlaybackInfo();
+    void updateGraphs();
+    void setupGraphs();
 
 private:
     bool validateInputs();
@@ -45,6 +58,19 @@ private:
 
     bool isRunning;
     double currentTime;
+
+    QMediaPlayer *mediaPlayer;
+    QAudioOutput *audioOutput;
+    QTimer *playbackTimer;
+    QVector<double> wavSamples;
+    double wavSampleRate;
+    qint64 wavDuration;
+
+    void setupAudioPlayback();
+    void updateUIForPlaybackState(bool isPlaying);
+
+    QTimer *graphUpdateTimer;
+    void setupGraphUpdateTimer();
 };
 
 #endif // MAINWINDOW_H

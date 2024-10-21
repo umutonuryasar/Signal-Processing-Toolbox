@@ -241,7 +241,7 @@
     <property name="title">
      <string>Audio Settings</string>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -305,7 +305,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label_file">
+         <widget class="QLabel" name="label_fileName">
           <property name="text">
            <string>No File Loaded</string>
           </property>
@@ -329,7 +329,7 @@
       <item row="2" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QPushButton" name="audioButton_start">
+         <widget class="QPushButton" name="audioButton_play">
           <property name="text">
            <string>Play</string>
           </property>

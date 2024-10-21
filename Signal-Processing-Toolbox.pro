@@ -1,6 +1,6 @@
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport multimedia
 
 CONFIG += c++17
 
@@ -16,7 +16,8 @@ SOURCES += \
     mainwindow.cpp \
     qcustomplot.cpp \
     timedomainplot.cpp \
-    wavegenerator.cpp
+    wavegenerator.cpp \
+    wavreader.cpp
 
 HEADERS += \
     fft.h \
@@ -25,7 +26,8 @@ HEADERS += \
     mainwindow.h \
     qcustomplot.h \
     timedomainplot.h \
-    wavegenerator.h
+    wavegenerator.h \
+    wavreader.h
 
 FORMS += \
     mainwindow.ui
