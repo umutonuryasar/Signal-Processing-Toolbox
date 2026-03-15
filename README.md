@@ -1,62 +1,62 @@
 # Signal Processing Toolbox
 
-A versatile Qt-based toolkit offering essential signal processing functionalities, including waveform generation, time-domain visualization, Fourier analysis, and filtering.
+A desktop DSP toolkit built in C++ with Qt — waveform generation, time/frequency domain visualization, digital filtering, and WAV file analysis. Designed around the same signal processing primitives that underpin audio ML, embedded sensing, and feature extraction pipelines.
+
+**Stack:** C++ · Qt · FFTW · QCustomPlot
+
+---
+
+## Overview
+
+This toolbox implements core DSP operations from scratch, providing an interactive environment for signal analysis. The architecture separates signal generation, transformation, and visualization into independent modules — making the codebase straightforward to extend.
+
+**Key modules:**
+
+| Module | File(s) | Description |
+| :--- | :--- | :--- |
+| Waveform Generator | `wavegenerator.cpp/h` | Parametric synthesis of sine, square, triangle, sawtooth, and white noise |
+| FFT Engine | `fft.cpp/h` | Discrete Fourier Transform via FFTW — outputs magnitude spectrum in dB |
+| Digital Filters | `filter.cpp/h` | FIR low-pass and high-pass filters with configurable cutoff and sample rate |
+| Time Domain Plot | `timedomainplot.cpp/h` | Interactive QCustomPlot widget — zoom, pan, real-time updates |
+| Frequency Domain Plot | `freqdomainplot.cpp/h` | FFT magnitude visualization with interactive frequency axis |
+| WAV Reader | `wavreader.cpp/h` | PCM WAV import with time/frequency domain analysis and playback |
+
+---
+
+## Design Notes
+
+**FFT via FFTW:** Rather than implementing a naive O(n²) DFT, the toolbox uses FFTW's Cooley-Tukey algorithm for O(n log n) complexity. For audio-length signals this is the practical choice — the same library used in production audio processing tools.
+
+**FIR filter design:** The filtering module implements a windowed-sinc FIR design. FIR filters are unconditionally stable (no feedback path) and have linear phase response — both properties matter for signal analysis where phase distortion would compromise frequency domain interpretation.
+
+**QCustomPlot for visualization:** Qt's built-in chart widgets lack the performance needed for real-time signal rendering. QCustomPlot handles dynamic updates efficiently and supports the zoom/pan interaction model needed for exploratory signal analysis.
+
+**Module separation:** Each DSP component (`fft`, `filter`, `wavegenerator`) is independently testable. This mirrors the modular design pattern used in production DSP pipelines and ML feature extraction systems.
+
+---
 
 ## Features
 
-- **Waveform Generation**: Create various waveforms to simulate different signals:
-  - **Sine Wave**: Represents a pure frequency with no harmonics, ideal for testing linear systems.
-  - **Square Wave**: Contains odd harmonics, commonly used in digital signal applications.
-  - **Triangle Wave**: Linear rise and fall, often used to test the linearity of systems.
-  - **Sawtooth Wave**: Contains both even and odd harmonics, suitable for sound synthesis and analysis.
-  - **White Noise**: Random signal with a flat frequency spectrum, useful for testing system response.
+- **Waveform synthesis** — sine, square, triangle, sawtooth, white noise with configurable frequency and amplitude
+- **FFT analysis** — magnitude spectrum in dB, interactive frequency domain plot
+- **Digital filtering** — low-pass / high-pass FIR with adjustable cutoff and sample rate
+- **WAV support** — import, visualize, filter, and play PCM audio files
+- **Real-time visualization** — synchronized time and frequency domain plots with zoom/pan
 
-- **Time-Domain Visualization**: Interactive plots to view signals over time using QCustomPlot. Features include:
-  - **Zoom and Pan**: Easily zoom in on specific portions of the signal and pan across the timeline.
-  - **Dynamic Updates**: Real-time plotting capabilities to visualize signals as they are generated.
-
-- **Frequency-Domain Analysis**: Fast Fourier Transform (FFT) visualization with magnitude plotting:
-  - **FFT Calculation**: Computes the frequency spectrum of the input signal to analyze its frequency components.
-  - **Magnitude Plotting**: Visualizes the magnitude of different frequency components in decibels (dB).
-  - **Interactive Frequency Plots**: Zoom and pan across the frequency domain for detailed analysis.
-
-- **Filtering**: Apply digital filters to signals for real-time signal processing:
-  - **Low Pass Filter**: Removes high-frequency components, allowing low-frequency components to pass through.
-  - **High Pass Filter**: Removes low-frequency components, allowing high-frequency components to pass through.
-  - **Adjustable Parameters**: Customize cutoff frequency and sampling frequency to achieve desired filtering effects.
-
-- **WAV File Support**: Load and analyze WAV files to visualize and process audio signals:
-  - **File Import**: Import WAV files for playback and signal analysis.
-  - **Graphical Analysis**: Plot the time-domain waveform and apply FFT to visualize the frequency components.
-  - **Playback Controls**: Play, pause, and stop audio files with real-time graphical updates.
+---
 
 ## Installation
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/umutonuryasar/Signal-Processing-Toolbox.git
-   ```
-2. Install dependencies (Qt, FFTW, QCustomPlot).
-   - **Qt**: Install Qt Creator or the Qt libraries.
-   - **FFTW**: Install the FFTW library for performing Fourier transforms.
-   - **QCustomPlot**: Include QCustomPlot for plotting functionalities.
-3. Build and run using Qt Creator or a preferred IDE.
+```bash
+git clone https://github.com/umutonuryasar/Signal-Processing-Toolbox.git
+```
 
-## Usage
+**Dependencies:** Qt (Qt Creator or Qt libraries) · FFTW · QCustomPlot
 
-- **Generate Signals**: Create different waveforms (sine, square, triangle, sawtooth, white noise) and visualize them in the time domain.
-- **Visualize Time Domain**: View generated signals in the time domain with interactive zoom and pan features.
-- **Analyze Frequency Domain**: Compute the FFT of generated or imported signals to view their frequency components.
-- **Apply Filters**: Use low-pass or high-pass filters to modify the generated signals and observe their real-time effects.
-- **Load WAV Files**: Import WAV files to visualize and analyze their time and frequency domain representations.
-- **Playback Audio**: Play loaded WAV files with synchronized time-domain and frequency-domain plots.
+Build and run using Qt Creator or `qmake` + `make`.
 
-## Dependencies
-
-- **Qt**: GUI framework for building the user interface and managing interactions.
-- **FFTW**: Fast Fourier Transform library for efficient computation of FFT.
-- **QCustomPlot**: Plotting library for interactive time-domain and frequency-domain graphs.
+---
 
 ## License
 
-Licensed under the [GNU GPL-3.0 License](LICENSE).
+GPL-3.0 — see [LICENSE](LICENSE)
