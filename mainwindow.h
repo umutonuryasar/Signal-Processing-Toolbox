@@ -33,9 +33,12 @@ private slots:
     void on_generatorButton_start_clicked();
     void on_generatorButton_stop_clicked();
     void updater();
-    void on_loadWavButton_clicked();
-    void on_playButton_clicked();
-    void on_stopButton_clicked();
+    // Connected explicitly in the constructor. Deliberately not named
+    // on_<widget>_clicked: that form is reserved for connectSlotsByName, and
+    // reusing it here would make Qt fire these twice.
+    void loadWavFile();
+    void startPlayback();
+    void stopPlayback();
     void on_progressSlider_valueChanged(int value);
     void updatePlaybackInfo();
     void updateGraphs();

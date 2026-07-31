@@ -14,7 +14,7 @@ SOURCES += \
     freqdomainplot.cpp \
     main.cpp \
     mainwindow.cpp \
-    qcustomplot.cpp \
+    third_party/qcustomplot/qcustomplot.cpp \
     timedomainplot.cpp \
     wavegenerator.cpp \
     wavreader.cpp
@@ -24,13 +24,17 @@ HEADERS += \
     filter.h \
     freqdomainplot.h \
     mainwindow.h \
-    qcustomplot.h \
+    third_party/qcustomplot/qcustomplot.h \
     timedomainplot.h \
     wavegenerator.h \
     wavreader.h
 
 FORMS += \
     mainwindow.ui
+
+# Vendored QCustomPlot. On the include path so <qcustomplot.h> keeps resolving,
+# including from the header that uic generates for mainwindow.ui.
+INCLUDEPATH += $$PWD/third_party/qcustomplot
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

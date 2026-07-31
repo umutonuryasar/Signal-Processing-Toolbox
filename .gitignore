@@ -39,6 +39,13 @@ Thumbs.db
 *.pro.user*
 CMakeLists.txt.user*
 
+# build directories
+/build*/
+/cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
 # xemacs temporary files
 *.flc
 

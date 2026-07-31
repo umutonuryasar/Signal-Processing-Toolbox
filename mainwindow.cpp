@@ -41,9 +41,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(playbackTimer, &QTimer::timeout, this, &MainWindow::updatePlaybackInfo);
     connect(timer, &QTimer::timeout, this, &MainWindow::updater);
-    connect(ui->pushButton_loadFile, &QPushButton::clicked, this, &MainWindow::on_loadWavButton_clicked);
-    connect(ui->audioButton_play, &QPushButton::clicked, this, &MainWindow::on_playButton_clicked);
-    connect(ui->audioButton_stop, &QPushButton::clicked, this, &MainWindow::on_stopButton_clicked);
+    connect(ui->pushButton_loadFile, &QPushButton::clicked, this, &MainWindow::loadWavFile);
+    connect(ui->audioButton_play, &QPushButton::clicked, this, &MainWindow::startPlayback);
+    connect(ui->audioButton_stop, &QPushButton::clicked, this, &MainWindow::stopPlayback);
     connect(graphUpdateTimer, &QTimer::timeout, this, &MainWindow::updateGraphs);
 
     setupGraphUpdateTimer();
@@ -216,7 +216,7 @@ void MainWindow::on_generatorButton_stop_clicked()
     }
 }
 
-void MainWindow::on_loadWavButton_clicked()
+void MainWindow::loadWavFile()
 {
     QString filePath = QFileDialog::getOpenFileName(this, "Open WAV File", "", "WAV Files (*.wav)");
     if (filePath.isEmpty()) return;
@@ -244,7 +244,7 @@ void MainWindow::setupGraphs()
     freqDomainPlot->setupPlot();
 }
 
-void MainWindow::on_playButton_clicked()
+void MainWindow::startPlayback()
 {
     if (mediaPlayer->source().isEmpty()) {
         QMessageBox::warning(this, "Error", "No audio file loaded.");
@@ -256,7 +256,7 @@ void MainWindow::on_playButton_clicked()
     updateUIForPlaybackState(true);
 }
 
-void MainWindow::on_stopButton_clicked()
+void MainWindow::stopPlayback()
 {
     mediaPlayer->stop();
     playbackTimer->stop();
