@@ -37,7 +37,27 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-unix|win32: LIBS += -L$$PWD/../../../libs/fftw-3.3.5-dll64/ -llibfftw3-3
+# FFTW.
+# On unix the library is resolved through pkg-config. On Windows (or when
+# pkg-config is unavailable) point FFTW_DIR at the FFTW folder, either here or
+# via qmake FFTW_DIR=/path/to/fftw.
+isEmpty(FFTW_DIR): FFTW_DIR = $$(FFTW_DIR)
 
-INCLUDEPATH += $$PWD/../../../libs/fftw-3.3.5-dll64
-DEPENDPATH += $$PWD/../../../libs/fftw-3.3.5-dll64
+# Fall back to the historical checkout layout so existing setups keep building.
+win32:isEmpty(FFTW_DIR) {
+    LEGACY_FFTW_DIR = $$PWD/../../../libs/fftw-3.3.5-dll64
+    exists($$LEGACY_FFTW_DIR): FFTW_DIR = $$LEGACY_FFTW_DIR
+}
+
+!isEmpty(FFTW_DIR) {
+    win32: LIBS += -L$$FFTW_DIR/ -llibfftw3-3
+    else:  LIBS += -L$$FFTW_DIR/ -lfftw3
+    INCLUDEPATH += $$FFTW_DIR
+    DEPENDPATH += $$FFTW_DIR
+} else {
+    unix {
+        CONFIG += link_pkgconfig
+        PKGCONFIG += fftw3
+    }
+    win32: error("FFTW not found. Pass FFTW_DIR=<path to fftw> to qmake.")
+}

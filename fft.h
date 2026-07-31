@@ -4,18 +4,14 @@
 #include <QVector>
 #include <fftw3.h>
 
-// Forward declaration
-namespace Ui {
-class MainWindow;
-}
-
 class FFT
 {
 public:
-    FFT(Ui::MainWindow *ui);
+    FFT();
     ~FFT();
 
-    void compute(const QVector<double> &inputData);
+    // Returns false when the input is empty or the sampling frequency is invalid.
+    bool compute(const QVector<double> &inputData, double samplingFrequency);
     const QVector<double> &getFFTOutput() const;
     const QVector<double> &getFreqSamples() const;
 
@@ -23,7 +19,6 @@ private:
     void allocateMemory(int size);
     void freeMemory();
 
-    Ui::MainWindow *ui;
     fftw_complex *fftInput;
     fftw_complex *fftOutput;
     fftw_plan plan;

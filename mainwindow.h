@@ -12,7 +12,10 @@
 #include <QMediaDevices>
 
 class FFT;
+class Filter;
 class WaveGenerator;
+class TimeDomainPlot;
+class FreqDomainPlot;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -49,7 +52,10 @@ private:
     Ui::MainWindow *ui;
     QTimer *timer;
     FFT *fft;
+    Filter *filter;
     WaveGenerator *waveGenerator;
+    TimeDomainPlot *timeDomainPlot;
+    FreqDomainPlot *freqDomainPlot;
 
     QVector<double> time;
     QVector<double> signal;
@@ -64,9 +70,7 @@ private:
     QTimer *playbackTimer;
     QVector<double> wavSamples;
     double wavSampleRate;
-    qint64 wavDuration;
 
-    void setupAudioPlayback();
     void updateUIForPlaybackState(bool isPlaying);
 
     QTimer *graphUpdateTimer;

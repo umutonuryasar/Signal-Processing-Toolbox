@@ -1,9 +1,7 @@
 #include "fft.h"
 #include <cmath>
-#include <stdexcept>
-#include "ui_mainwindow.h"
 
-FFT::FFT(Ui::MainWindow *ui) : ui(ui), fftInput(nullptr), fftOutput(nullptr), plan(nullptr), currentSize(0)
+FFT::FFT() : fftInput(nullptr), fftOutput(nullptr), plan(nullptr), currentSize(0)
 {
 }
 
@@ -25,6 +23,11 @@ void FFT::allocateMemory(int size)
 
 void FFT::freeMemory()
 {
+    // The plan refers to the buffers, so it has to go first.
+    if (plan) {
+        fftw_destroy_plan(plan);
+        plan = nullptr;
+    }
     if (fftInput) {
         fftw_free(fftInput);
         fftInput = nullptr;
@@ -33,23 +36,25 @@ void FFT::freeMemory()
         fftw_free(fftOutput);
         fftOutput = nullptr;
     }
-    if (plan) {
-        fftw_destroy_plan(plan);
-        plan = nullptr;
-    }
     currentSize = 0;
 }
 
-void FFT::compute(const QVector<double> &inputData)
+bool FFT::compute(const QVector<double> &inputData, double samplingFrequency)
 {
+    // Called from timer slots, so report failures instead of throwing.
     int size = inputData.size();
-    if (size == 0) {
-        throw std::runtime_error("Input data is empty");
+    if (size < 2 || samplingFrequency <= 0.0) {
+        outputData.clear();
+        freqSamples.clear();
+        return false;
     }
 
     allocateMemory(size);
-
-    double samplingFrequency = ui->lineEdit_samplingFrequency->text().toDouble();
+    if (!fftInput || !fftOutput || !plan) {
+        outputData.clear();
+        freqSamples.clear();
+        return false;
+    }
 
     for (int i = 0; i < size; i++)
     {
@@ -65,7 +70,12 @@ void FFT::compute(const QVector<double> &inputData)
 
     for(int i = 0; i < size / 2; i++)
     {
-        double magnitude = std::abs(std::sqrt(fftOutput[i][0] * fftOutput[i][0] + fftOutput[i][1] * fftOutput[i][1])) / size;
+        double magnitude = std::sqrt(fftOutput[i][0] * fftOutput[i][0] + fftOutput[i][1] * fftOutput[i][1]) / size;
+
+        // Single sided spectrum: every bin except DC carries the energy of its
+        // mirrored counterpart as well.
+        if (i > 0)
+            magnitude *= 2.0;
 
         // Handle near-zero magnitude values (avoid log(0))
         if (magnitude < 1e-10)
@@ -74,6 +84,8 @@ void FFT::compute(const QVector<double> &inputData)
         outputData[i] = 20 * std::log10(magnitude);
         freqSamples[i] = (i * samplingFrequency / size);
     }
+
+    return true;
 }
 
 const QVector<double> &FFT::getFFTOutput() const

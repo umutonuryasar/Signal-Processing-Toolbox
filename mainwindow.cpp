@@ -16,17 +16,26 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , timer(new QTimer(this))
-    , fft(new FFT(ui))
+    , fft(new FFT())
+    , filter(new Filter())
     , waveGenerator(nullptr)
+    , timeDomainPlot(nullptr)
+    , freqDomainPlot(nullptr)
     , isRunning(false)
     , currentTime(0.0)
     , mediaPlayer(new QMediaPlayer(this))
     , audioOutput(new QAudioOutput(this))
     , playbackTimer(new QTimer(this))
+    , wavSampleRate(0.0)
     , graphUpdateTimer(new QTimer(this))
 {
     ui->setupUi(this);
     this->setWindowTitle("Signal Processing Toolbox");
+
+    // The plot wrappers own no widgets, they only drive the ones from the form.
+    timeDomainPlot = new TimeDomainPlot(ui->timePlot);
+    freqDomainPlot = new FreqDomainPlot(ui->fftPlot);
+
     setupGraphs();
     mediaPlayer->setAudioOutput(audioOutput);
 
@@ -42,8 +51,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    delete timeDomainPlot;
+    delete freqDomainPlot;
     delete ui;
     delete fft;
+    delete filter;
     delete waveGenerator;
 }
 
@@ -68,21 +80,27 @@ bool MainWindow::validateInputs()
         return false;
     }
 
+    if (ui->comboBox_filterType->currentIndex() > 0) {
+        double cutoffFrequency = ui->lineEdit_cutoffFrequency->text().toDouble(&ok);
+        if (!ok || cutoffFrequency <= 0 || cutoffFrequency >= samplingFrequency / 2.0) {
+            QMessageBox::warning(this, "Invalid Input", "Please enter a valid cutoff frequency (must be > 0 and < sampling frequency / 2).");
+            return false;
+        }
+    }
+
     return true;
 }
 
 void MainWindow::generateWave()
 {
-    if (!validateInputs()) {
-        return;
-    }
-
     double amplitude = ui->lineEdit_amplitude->text().toDouble();
     double frequency = ui->lineEdit_frequency->text().toDouble();
     double samplingFrequency = ui->lineEdit_samplingFrequency->text().toDouble();
 
     delete waveGenerator;
     waveGenerator = new WaveGenerator(amplitude, frequency, samplingFrequency);
+
+    filter->reset();
 }
 
 void MainWindow::updateSignal()
@@ -90,31 +108,24 @@ void MainWindow::updateSignal()
     if (!waveGenerator) return;
 
     double samplingFrequency = ui->lineEdit_samplingFrequency->text().toDouble();
+    if (samplingFrequency <= 0) return;
+
     double duration = static_cast<double>(updateInterval) / 1000.0; // updateInterval milisecond to second
 
     WaveGenerator::WaveType waveType = static_cast<WaveGenerator::WaveType>(ui->comboBox_waveType->currentIndex());
     QVector<double> newSamples = waveGenerator->generateWave(waveType, duration, currentTime);
 
-    // Filter
-    int filterType = ui->comboBox_filterType->currentIndex();
-    if (filterType > 0) // 0 = No Filter
-    {
-        double cutoffFrequency = ui->lineEdit_cutoffFrequency->text().toDouble();
-        switch(filterType)
-        {
-        case 1: // Low Pass Filter
-            newSamples = Filter::lowPassFilter(newSamples, cutoffFrequency, samplingFrequency);
-            break;
-        case 2: // High Pass Filter
-            newSamples = Filter::highPassFilter(newSamples, cutoffFrequency, samplingFrequency);
-            break;
-        }
-    }
+    // The filter keeps its state across blocks, so configure() only resets it
+    // when the user actually changed the filter settings.
+    Filter::Type filterType = static_cast<Filter::Type>(ui->comboBox_filterType->currentIndex());
+    double cutoffFrequency = ui->lineEdit_cutoffFrequency->text().toDouble();
+    filter->configure(filterType, cutoffFrequency, samplingFrequency);
+    newSamples = filter->process(newSamples);
 
     signal.append(newSamples);
 
     int maxSamples = static_cast<int>(displayDuration * samplingFrequency);
-    if (signal.size() > maxSamples) {
+    if (maxSamples > 0 && signal.size() > maxSamples) {
         signal = signal.mid(signal.size() - maxSamples);
     }
 
@@ -128,6 +139,9 @@ void MainWindow::plotWave()
     }
 
     double samplingFrequency = ui->lineEdit_samplingFrequency->text().toDouble();
+    if (samplingFrequency <= 0) {
+        return;
+    }
 
     double dt = 1.0 / samplingFrequency;
     time.resize(signal.size());
@@ -136,18 +150,19 @@ void MainWindow::plotWave()
         time[i] = currentTime - (signal.size() - i) * dt;
     }
 
-    TimeDomainPlot timeplot(ui->timePlot);
-    timeplot.setupPlot();
-    timeplot.updatePlot(time, signal);
+    timeDomainPlot->updatePlot(time, signal);
 }
 
 void MainWindow::computeFFT()
 {
-    if (signal.isEmpty()) {
+    double samplingFrequency = ui->lineEdit_samplingFrequency->text().toDouble();
+
+    if (!fft->compute(signal, samplingFrequency)) {
+        fftOutput.clear();
+        fftFreqSamp.clear();
         return;
     }
 
-    fft->compute(signal);
     fftOutput = fft->getFFTOutput();
     fftFreqSamp = fft->getFreqSamples();
 }
@@ -158,9 +173,7 @@ void MainWindow::plotFFT()
         return;
     }
 
-    FreqDomainPlot fftPlot(ui->fftPlot);
-    fftPlot.setupPlot();
-    fftPlot.updatePlot(fftFreqSamp, fftOutput);
+    freqDomainPlot->updatePlot(fftFreqSamp, fftOutput);
 }
 
 void MainWindow::updater()
@@ -190,17 +203,16 @@ void MainWindow::on_generatorButton_stop_clicked()
         ui->generatorButton_start->setEnabled(true);
         ui->generatorButton_stop->setEnabled(false);
 
-        // Grafikleri temizle
+        // Clear the graphs
         signal.clear();
         time.clear();
         fftOutput.clear();
         fftFreqSamp.clear();
         currentTime = 0.0;
+        filter->reset();
 
-        ui->timePlot->graph(0)->data()->clear();
-        ui->fftPlot->graph(0)->data()->clear();
-        ui->timePlot->replot();
-        ui->fftPlot->replot();
+        timeDomainPlot->clearPlot();
+        freqDomainPlot->clearPlot();
     }
 }
 
@@ -209,50 +221,27 @@ void MainWindow::on_loadWavButton_clicked()
     QString filePath = QFileDialog::getOpenFileName(this, "Open WAV File", "", "WAV Files (*.wav)");
     if (filePath.isEmpty()) return;
 
-    if (WaveReader::readWavFile(filePath, wavSamples, wavSampleRate)) {
-        wavDuration = wavSamples.size() / wavSampleRate;
-        ui->label_fileName->setText("File: " + QFileInfo(filePath).fileName());
-
-        mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
-
-        ui->timePlot->graph(0)->setData(QVector<double>(), QVector<double>());
-        ui->fftPlot->graph(0)->setData(QVector<double>(), QVector<double>());
-        ui->timePlot->rescaleAxes();
-        ui->fftPlot->rescaleAxes();
-        ui->timePlot->replot();
-        ui->fftPlot->replot();
-
-        qDebug() << "WAV file loaded, graphs reset";
-
-        updateUIForPlaybackState(false);
-    } else {
+    if (!WaveReader::readWavFile(filePath, wavSamples, wavSampleRate) || wavSampleRate <= 0.0) {
+        wavSamples.clear();
+        wavSampleRate = 0.0;
         QMessageBox::warning(this, "Error", "Failed to read WAV file.");
+        return;
     }
+
+    ui->label_fileName->setText("File: " + QFileInfo(filePath).fileName());
+
+    mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
+
+    timeDomainPlot->clearPlot();
+    freqDomainPlot->clearPlot();
+
+    updateUIForPlaybackState(false);
 }
 
 void MainWindow::setupGraphs()
 {
-    // Time domain plot
-    ui->timePlot->addGraph();
-    ui->timePlot->xAxis->setLabel("Time (s)");
-    ui->timePlot->yAxis->setLabel("Amplitude");
-    ui->timePlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-
-    // Frequency domain plot
-    ui->fftPlot->addGraph();
-    ui->fftPlot->xAxis->setLabel("Frequency (Hz)");
-    ui->fftPlot->yAxis->setLabel("Magnitude");
-    ui->fftPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-
-    qDebug() << "Graphs setup completed";
-}
-
-void MainWindow::setupAudioPlayback()
-{
-    QString filePath = QFileDialog::getOpenFileName(this, "Open WAV File", "", "WAV Files (*.wav)");
-    if (filePath.isEmpty()) return;
-
-    mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
+    timeDomainPlot->setupPlot();
+    freqDomainPlot->setupPlot();
 }
 
 void MainWindow::on_playButton_clicked()
@@ -263,10 +252,8 @@ void MainWindow::on_playButton_clicked()
     }
     mediaPlayer->play();
     playbackTimer->start(100);
-    graphUpdateTimer->start(50);  // Bu satırın var olduğundan emin olun
+    graphUpdateTimer->start();
     updateUIForPlaybackState(true);
-
-    qDebug() << "Play button clicked, timers started";  // Debug mesajı ekleyin
 }
 
 void MainWindow::on_stopButton_clicked()
@@ -309,48 +296,42 @@ void MainWindow::updateUIForPlaybackState(bool isPlaying)
 
 void MainWindow::setupGraphUpdateTimer()
 {
-    graphUpdateTimer = new QTimer(this);
-    connect(graphUpdateTimer, &QTimer::timeout, this, &MainWindow::updateGraphs);
+    // The timer itself is created and connected in the constructor.
     graphUpdateTimer->setInterval(50);
 }
 
 void MainWindow::updateGraphs()
 {
-    qDebug() << "Updating graphs...";
-    if (!mediaPlayer || mediaPlayer->playbackState() != QMediaPlayer::PlayingState || wavSamples.isEmpty()) {
-        qDebug() << "Media not playing or samples empty";
+    if (!mediaPlayer || mediaPlayer->playbackState() != QMediaPlayer::PlayingState
+        || wavSamples.isEmpty() || wavSampleRate <= 0.0) {
         return;
     }
 
     qint64 position = mediaPlayer->position();
-    int windowSize = wavSampleRate / 10;
+    int windowSize = static_cast<int>(wavSampleRate / 10);
+    if (windowSize < 2) {
+        return;
+    }
 
     QVector<double> currentWindow(windowSize);
-    QVector<double> time(windowSize);
+    QVector<double> windowTime(windowSize);
 
-    qint64 samplePosition = (position * wavSampleRate) / 1000;
+    qint64 samplePosition = static_cast<qint64>(position * wavSampleRate / 1000.0);
 
     for (int i = 0; i < windowSize; ++i) {
-        int index = samplePosition + i;
+        qint64 index = samplePosition + i;
         if (index >= 0 && index < wavSamples.size()) {
             currentWindow[i] = wavSamples[index];
         } else {
             currentWindow[i] = 0;
         }
-        time[i] = i / static_cast<double>(wavSampleRate);
+        windowTime[i] = i / wavSampleRate;
     }
 
-    ui->timePlot->graph(0)->setData(time, currentWindow);
-    ui->timePlot->rescaleAxes();
-    ui->timePlot->replot();
+    timeDomainPlot->updatePlot(windowTime, currentWindow);
 
-    fft->compute(currentWindow);
-    QVector<double> fftOutput = fft->getFFTOutput();
-    QVector<double> fftFreqSamp = fft->getFreqSamples();
-
-    ui->fftPlot->graph(0)->setData(fftFreqSamp, fftOutput);
-    ui->fftPlot->rescaleAxes();
-    ui->fftPlot->replot();
-
-    qDebug() << "Graphs updated";
+    // The WAV has its own sample rate, which is unrelated to the generator one.
+    if (fft->compute(currentWindow, wavSampleRate)) {
+        freqDomainPlot->updatePlot(fft->getFreqSamples(), fft->getFFTOutput());
+    }
 }

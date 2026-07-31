@@ -11,6 +11,7 @@ public:
 
     void setupPlot();
     void updatePlot(const QVector<double> &freqSample, const QVector<double> &input);
+    void clearPlot();
 
 private:
     QCustomPlot *plot;
